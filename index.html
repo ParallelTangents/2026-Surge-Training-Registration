@@ -129,10 +129,8 @@
         let attendanceData = [];
 
         async function fetchAttendance() {
-            // Note: Space in table name requires quotes
             const { data, error } = await supabase.from('Surge 2026').select('*');
             if (!error) { attendanceData = data || []; renderAll(); }
-            else { console.error("Fetch Error:", error.message); }
         }
 
         function applyRoleLogic() {
@@ -213,13 +211,11 @@
             }]);
 
             if (!error) { this.reset(); applyRoleLogic(); fetchAttendance(); }
-            else { alert("Sign-in error: " + error.message); }
         };
 
         async function signOut(id) {
             const { error } = await supabase.from('Surge 2026').update({ rawEnd: new Date().toISOString() }).eq('id', id);
             if (!error) fetchAttendance();
-            else { alert("Sign-out error: " + error.message); }
         }
 
         async function requestReset() {
