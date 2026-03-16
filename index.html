@@ -129,8 +129,10 @@
         let attendanceData = [];
 
         async function fetchAttendance() {
-            const { data, error } = await supabase.from('surge_registrations').select('*');
+            // Note: Space in table name requires quotes
+            const { data, error } = await supabase.from('Surge 2026').select('*');
             if (!error) { attendanceData = data || []; renderAll(); }
+            else { console.error("Fetch Error:", error.message); }
         }
 
         function applyRoleLogic() {
@@ -200,7 +202,7 @@
             const agencyVal = document.getElementById('agency').value;
             const suffixes = { "GS": ".civ@health.mil", "MIL": ".mil@health.mil", "CTR": ".ctr@health.mil" };
 
-            const { error } = await supabase.from('surge_registrations').insert([{
+            const { error } = await supabase.from('Surge 2026').insert([{
                 email: prefix + suffixes[role],
                 role: role,
                 agency: agencyVal === 'Other' ? document.getElementById('otherA').value : agencyVal,
@@ -211,18 +213,20 @@
             }]);
 
             if (!error) { this.reset(); applyRoleLogic(); fetchAttendance(); }
+            else { alert("Sign-in error: " + error.message); }
         };
 
         async function signOut(id) {
-            const { error } = await supabase.from('surge_registrations').update({ rawEnd: new Date().toISOString() }).eq('id', id);
+            const { error } = await supabase.from('Surge 2026').update({ rawEnd: new Date().toISOString() }).eq('id', id);
             if (!error) fetchAttendance();
+            else { alert("Sign-out error: " + error.message); }
         }
 
         async function requestReset() {
             const pass = prompt("Enter Administration Password:");
             if (pass === "darkhor$e75") {
                 if (confirm("Permanently delete ALL session data?")) {
-                    const { error } = await supabase.from('surge_registrations').delete().neq('id', 0);
+                    const { error } = await supabase.from('Surge 2026').delete().neq('id', 0);
                     if (!error) fetchAttendance();
                 }
             }
