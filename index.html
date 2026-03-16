@@ -8,40 +8,30 @@
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; padding: 20px; max-width: 1300px; margin: auto; background: #f4f7f9; color: #333; }
         .header { text-align: center; color: #004a99; margin-bottom: 20px; }
-        
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid #004a99; text-align: center; }
         .stat-card h4 { margin: 0; font-size: 0.7em; color: #666; text-transform: uppercase; }
         .tile-val { font-size: 2em; font-weight: bold; color: #004a99; margin-top: 5px; }
-
         .report-section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #28a745; position: relative; }
-        
         .container { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 950px) { .container { grid-template-columns: 380px 1fr; } }
-        
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
         h3 { margin-top: 0; color: #004a99; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; font-size: 1.1em; }
-        
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85em; }
-        input[type="text"], input[type="password"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        
+        input[type="text"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .role-group { display: flex; gap: 10px; margin-top: 5px; }
         .role-option { flex: 1; text-align: center; border: 1px solid #ccc; padding: 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; font-weight: bold; background: #fff; }
         .role-option input { display: none; }
         .role-option:has(input:checked) { background: #004a99; color: white; border-color: #004a99; }
-        
         table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
         th { text-align: left; background: #f8f9fa; padding: 10px; border-bottom: 2px solid #dee2e6; color: #666; font-size: 0.75em; text-transform: uppercase; }
         td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
-        
         .btn-in { background: #004a99; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-out { background: #d9534f; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75em; }
         .btn-report { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; position: absolute; right: 20px; top: 15px; }
-        
         .admin-box { margin-top: 50px; text-align: center; border-top: 1px dashed #ccc; padding-top: 20px; }
         .btn-reset { background: none; color: #d9534f; border: 1px solid #d9534f; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7em; }
-
         .hidden { display: none; }
         .log-complete { background-color: #f0fff4; color: #2e7d32; font-weight: bold; }
         .date-stamp { font-size: 0.7em; color: #999; display: block; margin-top: 2px; }
@@ -78,10 +68,9 @@
             <h3>Personnel Check-In</h3>
             <form id="regForm">
                 <div class="form-group">
-                    <label>Email Prefix (e.g., jane.y.doe5)</label>
+                    <label>Email Prefix</label>
                     <input type="text" id="prefix" placeholder="firstname.lastname" required>
                 </div>
-                
                 <div class="form-group">
                     <label>Role</label>
                     <div class="role-group">
@@ -90,7 +79,6 @@
                         <label class="role-option"><input type="radio" name="role" value="CTR" onchange="applyRoleLogic()"> CTR</label>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>Agency</label>
                     <select id="agency" onchange="handleAgencyChange(this.value)"></select>
@@ -99,12 +87,10 @@
                         <input type="text" id="otherA" placeholder="Required description">
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>Department</label>
                     <input type="text" id="dept" required placeholder="e.g. ICU, ER">
                 </div>
-
                 <button type="submit" class="btn-in">Sign In to Session</button>
             </form>
         </div>
@@ -119,9 +105,8 @@
                     <tbody id="liveBody"></tbody>
                 </table>
             </div>
-
             <div class="card">
-                <h3>Permanent Training Log (Completed Sessions)</h3>
+                <h3>Permanent Training Log</h3>
                 <table>
                     <thead>
                         <tr><th>Personnel Email</th><th>Agency</th><th>Dept</th><th>Total Time</th></tr>
@@ -137,25 +122,15 @@
     </div>
 
     <script>
-        // Initialize Supabase Connection
         const SUPABASE_URL = 'https://plpvqsyszcnjnmrrwxjv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBscHZxc3lzemNuam5tcnJ3eGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTIwNDksImV4cCI6MjA4OTI2ODA0OX0.HMgdeChyjF-IQQ7lEv7UY979rgAKiK3ZaKCLQSQAk0Y';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let attendanceData = [];
 
-        // Fetch data from Supabase
         async function fetchAttendance() {
-            const { data, error } = await supabase
-                .from('surge_registrations')
-                .select('*');
-            
-            if (error) {
-                console.error('Error fetching data:', error.message);
-            } else {
-                attendanceData = data || [];
-                renderAll();
-            }
+            const { data, error } = await supabase.from('surge_registrations').select('*');
+            if (!error) { attendanceData = data || []; renderAll(); }
         }
 
         function applyRoleLogic() {
@@ -192,19 +167,13 @@
             let stats = { total: 0, hours: 0, GS: 0, MIL: 0, CTR: 0 };
             let agencyRollup = {};
             
-            liveBody.innerHTML = '';
-            logBody.innerHTML = '';
-            rollupBody.innerHTML = '';
+            liveBody.innerHTML = ''; logBody.innerHTML = ''; rollupBody.innerHTML = '';
 
             attendanceData.forEach((p) => {
                 const duration = parseFloat(calculateHours(p.rawStart, p.rawEnd));
-                stats.total++;
-                stats[p.role]++;
-                stats.hours += duration;
-
+                stats.total++; stats[p.role]++; stats.hours += duration;
                 if (!agencyRollup[p.agency]) agencyRollup[p.agency] = { count: 0, hours: 0 };
-                agencyRollup[p.agency].count++;
-                agencyRollup[p.agency].hours += duration;
+                agencyRollup[p.agency].count++; agencyRollup[p.agency].hours += duration;
 
                 if (!p.rawEnd) {
                     liveBody.innerHTML += `<tr><td><strong>${p.email}</strong><br><small>${p.agency}</small></td><td>${p.dept}</td><td>${duration.toFixed(2)} hrs</td><td><button class="btn-out" onclick="signOut('${p.id}')">Out</button></td></tr>`;
@@ -224,7 +193,6 @@
             });
         }
 
-        // Handle Form Submission (Sign-In)
         document.getElementById('regForm').onsubmit = async function(e) {
             e.preventDefault();
             const prefix = document.getElementById('prefix').value.trim().toLowerCase();
@@ -232,7 +200,7 @@
             const agencyVal = document.getElementById('agency').value;
             const suffixes = { "GS": ".civ@health.mil", "MIL": ".mil@health.mil", "CTR": ".ctr@health.mil" };
 
-            const newEntry = {
+            const { error } = await supabase.from('surge_registrations').insert([{
                 email: prefix + suffixes[role],
                 role: role,
                 agency: agencyVal === 'Other' ? document.getElementById('otherA').value : agencyVal,
@@ -240,76 +208,40 @@
                 date: new Date().toLocaleDateString(),
                 rawStart: new Date().toISOString(),
                 rawEnd: null
-            };
+            }]);
 
-            const { error } = await supabase
-                .from('surge_registrations')
-                .insert([newEntry]);
-
-            if (error) {
-                alert("Error signing in: " + error.message);
-            } else {
-                this.reset();
-                applyRoleLogic();
-                fetchAttendance();
-            }
+            if (!error) { this.reset(); applyRoleLogic(); fetchAttendance(); }
         };
 
-        // Handle Sign-Out
         async function signOut(id) {
-            const { error } = await supabase
-                .from('surge_registrations')
-                .update({ rawEnd: new Date().toISOString() })
-                .eq('id', id);
-
-            if (error) {
-                alert("Error signing out: " + error.message);
-            } else {
-                fetchAttendance();
-            }
+            const { error } = await supabase.from('surge_registrations').update({ rawEnd: new Date().toISOString() }).eq('id', id);
+            if (!error) fetchAttendance();
         }
 
         async function requestReset() {
-            const pass = prompt("Enter Administration Password to wipe all data:");
+            const pass = prompt("Enter Administration Password:");
             if (pass === "darkhor$e75") {
-                if (confirm("WARNING: This will permanently delete ALL data in the database. Proceed?")) {
-                    const { error } = await supabase
-                        .from('surge_registrations')
-                        .delete()
-                        .neq('id', 0); // Deletes everything
-                    
-                    if (error) {
-                        alert("Error resetting data: " + error.message);
-                    } else {
-                        fetchAttendance();
-                        alert("System Reset Complete.");
-                    }
+                if (confirm("Permanently delete ALL session data?")) {
+                    const { error } = await supabase.from('surge_registrations').delete().neq('id', 0);
+                    if (!error) fetchAttendance();
                 }
-            } else if (pass !== null) {
-                alert("Incorrect Password.");
             }
         }
 
         function exportDailySummary() {
             let csv = "Date,Personnel Email,Role,Agency,Department,Training Hours\n";
             attendanceData.forEach(p => {
-                const hrs = calculateHours(p.rawStart, p.rawEnd);
-                csv += `${p.date},${p.email},${p.role},${p.agency},${p.dept},${hrs}\n`;
+                csv += `${p.date},${p.email},${p.role},${p.agency},${p.dept},${calculateHours(p.rawStart, p.rawEnd)}\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `WRB_Surge_Report_${new Date().toLocaleDateString()}.csv`);
-            a.click();
+            a.href = url; a.download = `WRB_Surge_Report_${new Date().toLocaleDateString()}.csv`; a.click();
         }
 
-        setInterval(fetchAttendance, 60000); // Sync every minute
+        setInterval(fetchAttendance, 60000);
         setInterval(() => document.getElementById('live-clock').innerText = new Date().toLocaleString(), 1000);
-        
-        // Initial Page Load
         fetchAttendance();
-        document.getElementById('live-clock').innerText = new Date().toLocaleString();
     </script>
 </body>
 </html>
