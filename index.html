@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WRB Surge Training 2026 - Secured Command Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; padding: 20px; max-width: 1300px; margin: auto; background: #f4f7f9; color: #333; }
         .header { text-align: center; color: #004a99; margin-bottom: 20px; }
@@ -136,8 +137,26 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'wrb_surge_2026_final_secure';
-        let attendanceData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        // Initialize Supabase Connection
+        const SUPABASE_URL = 'https://plpvqsyszcnjnmrrwxjv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBscHZxc3lzemNuam5tcnJ3eGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2OTIwNDksImV4cCI6MjA4OTI2ODA0OX0.HMgdeChyjF-IQQ7lEv7UY979rgAKiK3ZaKCLQSQAk0Y';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let attendanceData = [];
+
+        // Fetch data from Supabase
+        async function fetchAttendance() {
+            const { data, error } = await supabase
+                .from('surge_registrations')
+                .select('*');
+            
+            if (error) {
+                console.error('Error fetching data:', error.message);
+            } else {
+                attendanceData = data || [];
+                renderAll();
+            }
+        }
 
         function applyRoleLogic() {
             const role = document.querySelector('input[name="role"]:checked').value;
@@ -177,7 +196,7 @@
             logBody.innerHTML = '';
             rollupBody.innerHTML = '';
 
-            attendanceData.forEach((p, idx) => {
+            attendanceData.forEach((p) => {
                 const duration = parseFloat(calculateHours(p.rawStart, p.rawEnd));
                 stats.total++;
                 stats[p.role]++;
@@ -188,7 +207,7 @@
                 agencyRollup[p.agency].hours += duration;
 
                 if (!p.rawEnd) {
-                    liveBody.innerHTML += `<tr><td><strong>${p.email}</strong><br><small>${p.agency}</small></td><td>${p.dept}</td><td>${duration.toFixed(2)} hrs</td><td><button class="btn-out" onclick="signOut(${idx})">Out</button></td></tr>`;
+                    liveBody.innerHTML += `<tr><td><strong>${p.email}</strong><br><small>${p.agency}</small></td><td>${p.dept}</td><td>${duration.toFixed(2)} hrs</td><td><button class="btn-out" onclick="signOut('${p.id}')">Out</button></td></tr>`;
                 } else {
                     logBody.innerHTML += `<tr><td>${p.email}<span class="date-stamp">${p.date}</span></td><td>${p.agency}</td><td>${p.dept}</td><td class="log-complete">${duration.toFixed(2)} hrs</td></tr>`;
                 }
@@ -203,42 +222,68 @@
             Object.keys(agencyRollup).sort().forEach(name => {
                 rollupBody.innerHTML += `<tr><td><strong>${name}</strong></td><td>${agencyRollup[name].count}</td><td>${agencyRollup[name].hours.toFixed(2)} hrs</td></tr>`;
             });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceData));
         }
 
-        document.getElementById('regForm').onsubmit = function(e) {
+        // Handle Form Submission (Sign-In)
+        document.getElementById('regForm').onsubmit = async function(e) {
             e.preventDefault();
             const prefix = document.getElementById('prefix').value.trim().toLowerCase();
             const role = document.querySelector('input[name="role"]:checked').value;
             const agencyVal = document.getElementById('agency').value;
             const suffixes = { "GS": ".civ@health.mil", "MIL": ".mil@health.mil", "CTR": ".ctr@health.mil" };
 
-            attendanceData.push({
+            const newEntry = {
                 email: prefix + suffixes[role],
                 role: role,
                 agency: agencyVal === 'Other' ? document.getElementById('otherA').value : agencyVal,
                 dept: document.getElementById('dept').value.toUpperCase(),
                 date: new Date().toLocaleDateString(),
-                rawStart: new Date(),
+                rawStart: new Date().toISOString(),
                 rawEnd: null
-            });
-            renderAll();
-            this.reset();
-            applyRoleLogic();
+            };
+
+            const { error } = await supabase
+                .from('surge_registrations')
+                .insert([newEntry]);
+
+            if (error) {
+                alert("Error signing in: " + error.message);
+            } else {
+                this.reset();
+                applyRoleLogic();
+                fetchAttendance();
+            }
         };
 
-        function signOut(idx) {
-            attendanceData[idx].rawEnd = new Date();
-            renderAll();
+        // Handle Sign-Out
+        async function signOut(id) {
+            const { error } = await supabase
+                .from('surge_registrations')
+                .update({ rawEnd: new Date().toISOString() })
+                .eq('id', id);
+
+            if (error) {
+                alert("Error signing out: " + error.message);
+            } else {
+                fetchAttendance();
+            }
         }
 
-        function requestReset() {
+        async function requestReset() {
             const pass = prompt("Enter Administration Password to wipe all data:");
             if (pass === "darkhor$e75") {
-                if (confirm("WARNING: This will permanently delete all test data and logs. Proceed?")) {
-                    attendanceData = [];
-                    renderAll();
-                    alert("System Reset Complete.");
+                if (confirm("WARNING: This will permanently delete ALL data in the database. Proceed?")) {
+                    const { error } = await supabase
+                        .from('surge_registrations')
+                        .delete()
+                        .neq('id', 0); // Deletes everything
+                    
+                    if (error) {
+                        alert("Error resetting data: " + error.message);
+                    } else {
+                        fetchAttendance();
+                        alert("System Reset Complete.");
+                    }
                 }
             } else if (pass !== null) {
                 alert("Incorrect Password.");
@@ -259,9 +304,11 @@
             a.click();
         }
 
-        setInterval(renderAll, 60000);
+        setInterval(fetchAttendance, 60000); // Sync every minute
         setInterval(() => document.getElementById('live-clock').innerText = new Date().toLocaleString(), 1000);
-        renderAll();
+        
+        // Initial Page Load
+        fetchAttendance();
         document.getElementById('live-clock').innerText = new Date().toLocaleString();
     </script>
 </body>
